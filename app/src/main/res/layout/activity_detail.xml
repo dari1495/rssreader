@@ -43,5 +43,12 @@
             android:layout_height="wrap_content"
             android:id="@+id/button_back"
             android:onClick="goBack" />
+
+        <Button
+            android:text="Go to source"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_link"
+            android:onClick="goToSource" />
     </LinearLayout>
 </RelativeLayout>

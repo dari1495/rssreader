@@ -1,6 +1,7 @@
 package mapexam.rssreader;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
@@ -20,6 +21,7 @@ public class detailActivity extends AppCompatActivity {
     TextView mTitle;
     TextView mBody;
     TextView mLink;
+    String link;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +32,7 @@ public class detailActivity extends AppCompatActivity {
         mLink = (TextView)findViewById(R.id.linkView);
         String title = intent.getExtras().getString("title");
         String body = intent.getExtras().getString("body");
-        String link = intent.getExtras().getString("link");
+        link = intent.getExtras().getString("link");
         System.out.println("Title: "+title + "" +
                 "\n Body: " + body +"" +
                 "|n link: "+ link);
@@ -42,5 +44,14 @@ public class detailActivity extends AppCompatActivity {
 
     public void goBack(View v){
         finish();
+    }
+
+    public void goToSource(View v){
+        if (!link.startsWith("http://") && !link.startsWith("https://")) {
+            link = "http://" + link;
+        }
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+        startActivity(browserIntent);
+
     }
 }

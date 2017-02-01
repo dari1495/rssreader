@@ -39,6 +39,7 @@
                     android:drawableRight="@drawable/feed28x28"
                     android:background="?attr/selectableItemBackground"
                     android:text=""
+                    android:textAlignment="gravity"
                     android:gravity="right"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
