@@ -2,7 +2,10 @@ package mapexam.rssreader;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -37,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     RecyclerView mRecyclerView;
     static String RSS_feed = "";
+    static String old_feed = "";
     List<itemRSS> arrayRSS;
     SwipeRefreshLayout mSwipeLayout;
     final int STATIC_INTEGER_VALUE = 123;
@@ -67,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         });
         Intent intent = getIntent();
         try {
+            old_feed = RSS_feed;
             RSS_feed = intent.getExtras().getString("newRSS");
             // TODO: Delete this once everything works
             // This is just to check if the link is OK
@@ -107,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == STATIC_INTEGER_VALUE) {
             if(resultCode == Activity.RESULT_OK){
                 String result=data.getStringExtra("newRSS");
+                old_feed = RSS_feed;
                 RSS_feed = result;
                 t = (EditText)findViewById(R.id.editText);
                 t.setText(RSS_feed);
@@ -174,13 +180,32 @@ public class MainActivity extends AppCompatActivity {
                         "PROCEDO A SET ADAPTER ARRAYRSS\n" +
                         arrayRSS.get(1).title + "\n\n");
                 mRecyclerView.setAdapter(new RssFeedListAdapter(arrayRSS));
-            } else {
-                Toast.makeText(MainActivity.this,
-                        "Enter a valid RSS feed url",
-                        Toast.LENGTH_LONG).show();
+            } else { //Failure, reverting to old feed
+                RSS_feed = old_feed;
+                if(!checkConnectivity()){ //there's connection
+                    Toast.makeText(MainActivity.this,
+                            "No news read, connectivity failure",
+                            Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Toast.makeText(MainActivity.this,
+                            "No news read, invalid feed",
+                            Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
+
+    public boolean checkConnectivity(){
+        Context context = this;
+        ConnectivityManager cm =
+                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+
     public class RssFeedListAdapter
             extends RecyclerView.Adapter<RssFeedListAdapter.FeedModelViewHolder> {
 
