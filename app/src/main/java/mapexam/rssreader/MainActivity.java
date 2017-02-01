@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -51,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //Recovering RSS_feed form last session
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        RSS_feed = preferences.getString("RSS_feed","");
+
         mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         mRecyclerView= (RecyclerView) findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -70,29 +75,44 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         Intent intent = getIntent();
-        try {
-            old_feed = RSS_feed;
-            RSS_feed = intent.getExtras().getString("newRSS");
-            // TODO: Delete this once everything works
-            // This is just to check if the link is OK
-            t = (EditText)findViewById(R.id.editText);
-            t.setText(RSS_feed);
-            // TODO: detailed view and icon
+        if(RSS_feed.isEmpty()) { //No saved from last session
+            try {
+                old_feed = RSS_feed;
+                RSS_feed = intent.getExtras().getString("newRSS");
+                // TODO: Delete this once everything works
+                // This is just to check if the link is OK
+                t = (EditText) findViewById(R.id.editText);
+                t.setText(RSS_feed);
+                // TODO: detailed view and icon
 
-            f.setVisibility(View.GONE);
+                f.setVisibility(View.GONE);
+                new GetFeedTask().execute((Void) null);
+                mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                    public void onRefresh() {
+                        new GetFeedTask().execute((Void) null);
+                    }
+                });
+
+            } catch (Exception e) {//This means empty rss feed
+                tt.setText("Select RSS feed");
+                f.setVisibility(View.VISIBLE);
+                //No RSS_feed = app is kill
+            }
+        }
+        else{ //there's a RSS_feed saved from last session
             new GetFeedTask().execute((Void) null);
-            mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-                public void onRefresh(){
-                    new GetFeedTask().execute((Void) null);
-                }
-            });
+        }
+    }
 
-        }
-        catch (Exception e){//This means empty rss feed
-            tt.setText("Select RSS feed");
-            f.setVisibility(View.VISIBLE);
-            //No RSS_feed = app is kill
-        }
+    @Override
+    protected void onPause(){
+        SharedPreferences preferences = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        //Save the RSS_feed for next startup
+        editor.putString("RSS_feed", RSS_feed);
+        editor.commit();
+        super.onPause();
     }
 
 
@@ -244,6 +264,8 @@ public class MainActivity extends AppCompatActivity {
             return mRssFeedModels.size();
         }
     }
+
+
 
 
     // useless menu
