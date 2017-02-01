@@ -46,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     List<itemRSS> arrayRSS;
     SwipeRefreshLayout mSwipeLayout;
     final int STATIC_INTEGER_VALUE = 123;
-    EditText t;
     FrameLayout f;
     TextView tt;
     @Override
@@ -147,9 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 String result=data.getStringExtra("newRSS");
                 old_feed = RSS_feed;
                 RSS_feed = result;
-                t = (EditText)findViewById(R.id.editText);
-                t.setText(RSS_feed);
-                // TODO: detailed view and icon
+                // TODO: icon
                 if(result.isEmpty()){
                     tt.setText("Select RSS feed");
                     f.setVisibility(View.VISIBLE);

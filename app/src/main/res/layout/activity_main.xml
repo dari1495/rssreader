@@ -47,17 +47,6 @@
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:layout_gravity="end"
-            android:ems="10"
-            android:id="@+id/editText"
-            android:clickable="false"
-            android:focusable="false"
-            android:focusableInTouchMode="false" />
-
         <FrameLayout
             android:id="@+id/frameLayout"
             android:layout_width="match_parent"
