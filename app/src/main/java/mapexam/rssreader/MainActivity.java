@@ -32,6 +32,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,18 +75,21 @@ public class MainActivity extends AppCompatActivity {
                 changeRSS(v);
             }
         });
+
+        // TEST
+        ItemClickSupport.addTo(mRecyclerView)
+                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        detailedActivity(position);
+                    }
+                });
+        // TEST
         Intent intent = getIntent();
         if(RSS_feed.isEmpty()) { //No saved from last session
             try {
                 old_feed = RSS_feed;
                 RSS_feed = intent.getExtras().getString("newRSS");
-                // TODO: Delete this once everything works
-                // This is just to check if the link is OK
-                t = (EditText) findViewById(R.id.editText);
-                t.setText(RSS_feed);
-                // TODO: detailed view and icon
-
-                f.setVisibility(View.GONE);
                 new GetFeedTask().execute((Void) null);
                 mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                     public void onRefresh() {
@@ -102,6 +106,15 @@ public class MainActivity extends AppCompatActivity {
         else{ //there's a RSS_feed saved from last session
             new GetFeedTask().execute((Void) null);
         }
+    }
+
+    private void detailedActivity(int position) {
+        Intent intent = new Intent(this, detailActivity.class);
+        itemRSS i = arrayRSS.get(position);
+        intent.putExtra("title", i.getTitle());
+        intent.putExtra("body", i.getDescription());
+        intent.putExtra("link", i.getLink());
+        startActivity(intent);
     }
 
     @Override
@@ -175,12 +188,9 @@ public class MainActivity extends AppCompatActivity {
                     urlLink = "http://" + urlLink;
 
                 URL url = new URL(urlLink);
-                //System.out.println("URL INPUT:" +urlLink.toString());
                 InputStream inputStream = url.openConnection().getInputStream();
                 XMLParser parserC = new XMLParser();
                 arrayRSS = parserC.parse(inputStream);
-                System.out.println("!!!!!!" +
-                        "\n\n alive after parse \n" + arrayRSS.get(1).title + "\n\n");
                 return true;
             } catch (IOException e) {
                 Log.e(TAG, "Error", e);
@@ -196,9 +206,6 @@ public class MainActivity extends AppCompatActivity {
 
             if (success) {
                 // Fill RecyclerView
-                System.out.println("!!!!!\n\n" +
-                        "PROCEDO A SET ADAPTER ARRAYRSS\n" +
-                        arrayRSS.get(1).title + "\n\n");
                 mRecyclerView.setAdapter(new RssFeedListAdapter(arrayRSS));
             } else { //Failure, reverting to old feed
                 RSS_feed = old_feed;
@@ -227,9 +234,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class RssFeedListAdapter
-            extends RecyclerView.Adapter<RssFeedListAdapter.FeedModelViewHolder> {
+            extends RecyclerView.Adapter<RssFeedListAdapter.FeedModelViewHolder>{
 
         private List<itemRSS> mRssFeedModels;
+
 
         public class FeedModelViewHolder extends RecyclerView.ViewHolder {
             private View rssFeedView;
@@ -254,15 +262,17 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(FeedModelViewHolder holder, int position) {
+
             final itemRSS rssFeedModel = mRssFeedModels.get(position);
-           // System.out.println("title " + position + ": "+rssFeedModel.getTitle() + " " + mRssFeedModels.get(position).title);
             ((TextView)holder.rssFeedView.findViewById(R.id.titleText)).setText(rssFeedModel.title);
+
         }
 
         @Override
         public int getItemCount() {
             return mRssFeedModels.size();
         }
+
     }
 
 

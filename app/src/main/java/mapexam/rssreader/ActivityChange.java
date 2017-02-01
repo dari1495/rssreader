@@ -25,7 +25,6 @@ public class ActivityChange extends AppCompatActivity {
         // save the url given
         final EditText RSS_given = (EditText) findViewById(R.id.RSS_URL);
         RSS_feed = RSS_given.getText().toString();
-        System.out.println(RSS_feed);
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("newRSS",RSS_feed);
         //startActivity(intent);

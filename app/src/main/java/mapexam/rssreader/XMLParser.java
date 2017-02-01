@@ -72,21 +72,13 @@ public class XMLParser {
 
                 if (title != null && link != null && description != null) {
                     if(isItem) {
-                        System.out.println("a lista "+ title + " desc" + description + " link" + link);
-                        itemRSS item = new itemRSS(title, description, link);
-                        System.out.println("item1 "+ item.title);
+                        itemRSS item = new itemRSS();
+                        item.setDescription(description);
+                        item.setTitle(title);
+                        item.setLink(link);
                         items.add(item);
-                        int pos = items.size();
-                        if (pos >= 2) {
-                            System.out.println("last: " +items.get(pos-2).title
-                                    + "\n now: "+ items.get(pos-1).title);
-                        }
                     }
                     else {
-                        System.out.println("leo: " + title);
-                        //mFeedTitle = title;
-                        //mFeedLink = link;
-                       // mFeedDescription = description;
                     }
 
                     title = null;

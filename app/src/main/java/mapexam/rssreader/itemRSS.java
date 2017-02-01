@@ -9,27 +9,16 @@ import java.net.URL;
 
 public class itemRSS {
     String title;
-    private String description;
-    private URL link;
-    private String linkString;
+    String description;
+    String link;
 
     public itemRSS(){
 
     }
-    public itemRSS(String title, String description, URL link){
-        this.title = title;
-        this.description = description;
-        this.link = link;
-    }
     public itemRSS(String title, String description, String link){
         this.title = title;
         this.description = description;
-        /*try {
-            this.link = new URL(link);
-        } catch (MalformedURLException e) {
-            this.linkString = link;
-            e.printStackTrace();
-        }*/
+        this.link = link;
     }
 
     public String getTitle() {
@@ -48,19 +37,11 @@ public class itemRSS {
         this.description = description;
     }
 
-    public URL getLink() {
+    public String getLink() {
         return link;
     }
 
-    public void setLink(URL link) {
+    public void setLink(String link) {
         this.link = link;
-    }
-
-    public String getLinkString() {
-        return linkString;
-    }
-
-    public void setLinkString(String linkString) {
-        this.linkString = linkString;
     }
 }
