@@ -6,9 +6,8 @@
     <item
         android:id="@+id/changefeed"
         android:icon="@drawable/feed28x28"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
+        android:orderInCategory="100"
         android:title="Change feed">
     </item>
 </menu>

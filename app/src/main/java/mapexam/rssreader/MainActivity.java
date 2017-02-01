@@ -11,6 +11,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,8 +22,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // Setting up the toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+        // TODO: The goddamn button won't align to the right
+        TextView tvSave = (TextView)findViewById(R.id.button_rss);
+        // Action for button
+        tvSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                changeRSS(v);
+            }
+        });
         Intent intent = getIntent();
         try {
             RSS_feed = intent.getExtras().getString("newRSS");
@@ -32,23 +45,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /* Useless for now
+
+    /**
+     * Launching the activity to change the RSS feed link
+     * @param v
+     */
     public void changeRSS(View v){
         Intent intent = new Intent(this, ActivityChange.class);
         intent.putExtra("RSS_feed", RSS_feed);
         startActivity(intent);
     }
-    */
 
+    /** useless menu
     @SuppressWarnings("ResourceType")
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.layout.toolbar_menu, menu);
-        MenuItem m = (MenuItem)findViewById(R.id.changefeed);
 
         return true;
     }
-
 
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -65,4 +80,5 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+    */
 }
