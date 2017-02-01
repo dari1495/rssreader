@@ -22,7 +22,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPersonName"
+            android:inputType="textWebEmailAddress"
             android:ems="10"
             android:id="@+id/RSS_URL"
             android:textAlignment="center"
@@ -34,6 +34,13 @@
             android:layout_height="wrap_content"
             android:id="@+id/accept_url"
             android:onClick="changeRSS" />
+
+        <Button
+            android:text="Clear"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_clear"
+            android:onClick="clearText" />
     </LinearLayout>
 
 </RelativeLayout>

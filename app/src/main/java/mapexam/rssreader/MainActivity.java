@@ -1,27 +1,58 @@
 package mapexam.rssreader;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.os.AsyncTask;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import android.support.v7.widget.RecyclerView;
 
 public class MainActivity extends AppCompatActivity {
 
+    RecyclerView mRecyclerView;
     static String RSS_feed = "";
+    List<itemRSS> arrayRSS;
+    SwipeRefreshLayout mSwipeLayout;
+    final int STATIC_INTEGER_VALUE = 123;
+    EditText t;
+    FrameLayout f;
+    TextView tt;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mSwipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        mRecyclerView= (RecyclerView) findViewById(R.id.recyclerView);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        f = (FrameLayout)findViewById(R.id.frameLayout);
+        tt = (TextView)findViewById(R.id.textView5) ;
+
         // Setting up the toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -37,11 +68,25 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         try {
             RSS_feed = intent.getExtras().getString("newRSS");
-            EditText t = (EditText)findViewById(R.id.editText);
+            // TODO: Delete this once everything works
+            // This is just to check if the link is OK
+            t = (EditText)findViewById(R.id.editText);
             t.setText(RSS_feed);
+            // TODO: detailed view and icon
+
+            f.setVisibility(View.GONE);
+            new GetFeedTask().execute((Void) null);
+            mSwipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                public void onRefresh(){
+                    new GetFeedTask().execute((Void) null);
+                }
+            });
+
         }
-        catch (Exception e){
-            //No RSS_feed yet = app is kill
+        catch (Exception e){//This means empty rss feed
+            tt.setText("Select RSS feed");
+            f.setVisibility(View.VISIBLE);
+            //No RSS_feed = app is kill
         }
     }
 
@@ -50,13 +95,134 @@ public class MainActivity extends AppCompatActivity {
      * Launching the activity to change the RSS feed link
      * @param v
      */
-    public void changeRSS(View v){
+    private void changeRSS(View v){
         Intent intent = new Intent(this, ActivityChange.class);
         intent.putExtra("RSS_feed", RSS_feed);
-        startActivity(intent);
+        startActivityForResult(intent,STATIC_INTEGER_VALUE);
     }
 
-    /** useless menu
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == STATIC_INTEGER_VALUE) {
+            if(resultCode == Activity.RESULT_OK){
+                String result=data.getStringExtra("newRSS");
+                RSS_feed = result;
+                t = (EditText)findViewById(R.id.editText);
+                t.setText(RSS_feed);
+                // TODO: detailed view and icon
+                if(result.isEmpty()){
+                    tt.setText("Select RSS feed");
+                    f.setVisibility(View.VISIBLE);
+                }
+                else {
+                    f.setVisibility(View.GONE);
+                    new GetFeedTask().execute((Void) null);
+                }
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //nothing
+            }
+        }
+    }
+
+
+    private class GetFeedTask extends AsyncTask<Void, Void, Boolean> {
+
+        private static final String TAG = "Error in getFeedTask";
+        private String urlLink;
+
+        @Override
+        protected void onPreExecute() {
+            mSwipeLayout.setRefreshing(true);
+            urlLink = RSS_feed;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            if (TextUtils.isEmpty(urlLink)){
+
+                return false;}
+
+            try {
+                if(!urlLink.startsWith("http://") && !urlLink.startsWith("https://"))
+                    urlLink = "http://" + urlLink;
+
+                URL url = new URL(urlLink);
+                //System.out.println("URL INPUT:" +urlLink.toString());
+                InputStream inputStream = url.openConnection().getInputStream();
+                XMLParser parserC = new XMLParser();
+                arrayRSS = parserC.parse(inputStream);
+                System.out.println("!!!!!!" +
+                        "\n\n alive after parse \n" + arrayRSS.get(1).title + "\n\n");
+                return true;
+            } catch (IOException e) {
+                Log.e(TAG, "Error", e);
+            } catch (XmlPullParserException e) {
+                Log.e(TAG, "Error", e);
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            mSwipeLayout.setRefreshing(false);
+
+            if (success) {
+                // Fill RecyclerView
+                System.out.println("!!!!!\n\n" +
+                        "PROCEDO A SET ADAPTER ARRAYRSS\n" +
+                        arrayRSS.get(1).title + "\n\n");
+                mRecyclerView.setAdapter(new RssFeedListAdapter(arrayRSS));
+            } else {
+                Toast.makeText(MainActivity.this,
+                        "Enter a valid RSS feed url",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+    public class RssFeedListAdapter
+            extends RecyclerView.Adapter<RssFeedListAdapter.FeedModelViewHolder> {
+
+        private List<itemRSS> mRssFeedModels;
+
+        public class FeedModelViewHolder extends RecyclerView.ViewHolder {
+            private View rssFeedView;
+
+            public FeedModelViewHolder(View v) {
+                super(v);
+                rssFeedView = v;
+            }
+        }
+
+        public RssFeedListAdapter(List<itemRSS> rssFeedModels) {
+            mRssFeedModels = rssFeedModels;
+        }
+
+        @Override
+        public FeedModelViewHolder onCreateViewHolder(ViewGroup parent, int type) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_rss, parent, false);
+            FeedModelViewHolder holder = new FeedModelViewHolder(v);
+            return holder;
+        }
+
+        @Override
+        public void onBindViewHolder(FeedModelViewHolder holder, int position) {
+            final itemRSS rssFeedModel = mRssFeedModels.get(position);
+           // System.out.println("title " + position + ": "+rssFeedModel.getTitle() + " " + mRssFeedModels.get(position).title);
+            ((TextView)holder.rssFeedView.findViewById(R.id.titleText)).setText(rssFeedModel.title);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mRssFeedModels.size();
+        }
+    }
+
+
+    // useless menu
+    /**
     @SuppressWarnings("ResourceType")
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -80,5 +246,13 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
     */
 }
+
+
+
+
+
+
+

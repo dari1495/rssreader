@@ -1,5 +1,6 @@
 package mapexam.rssreader;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,13 +24,19 @@ public class ActivityChange extends AppCompatActivity {
     public void changeRSS(View v) {
         // save the url given
         final EditText RSS_given = (EditText) findViewById(R.id.RSS_URL);
-        System.out.println("el usuario escribe: " + RSS_given);
         RSS_feed = RSS_given.getText().toString();
         System.out.println(RSS_feed);
-        Intent i2 = getIntent();
-        i2.putExtra("nRSS_feed",RSS_feed);
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("newRSS",RSS_feed);
-        startActivity(intent);
+        //startActivity(intent);
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra("newRSS",RSS_feed);
+        setResult(Activity.RESULT_OK,resultIntent);
+        finish();
+    }
+    public void clearText(View v) {
+        //clear the field
+        EditText t = (EditText) findViewById(R.id.RSS_URL);
+        t.setText("");
     }
 }
